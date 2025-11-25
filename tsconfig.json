@@ -9,6 +9,11 @@
     "sourceMap": true,
     "outDir": "dist",
     "resolveJsonModule": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
   }
 }

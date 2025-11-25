@@ -1,0 +1,120 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 500px;
+    padding-bottom: 50px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.total {
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.total strong {
+    color: var(--accent-primary);
+    font-size: 20px;
+}
+
+.empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.entry {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.entry:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.entryContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.entryHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hours {
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.date {
+    font-size: 12px;
+    color: var(--text-tertiary);
+}
+
+.description {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.link:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+.deleteButton {
+    background-color: transparent;
+    color: var(--danger);
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.deleteButton:hover {
+    background-color: var(--danger);
+    color: white;
+}

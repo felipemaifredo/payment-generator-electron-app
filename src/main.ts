@@ -1,6 +1,7 @@
-import { app, BrowserWindow } from "electron"
+import { app, BrowserWindow, ipcMain } from "electron"
 import path from "node:path"
 import started from "electron-squirrel-startup"
+import { db } from "./configs/firebaseConfig"
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -28,6 +29,117 @@ const createWindow = () => {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools()
+
+  // Firebase IPC Handlers
+  ipcMain.handle("firebase:test-connection", async () => {
+    try {
+      const collections = await db.listCollections()
+      return { success: true, message: `Conectado! Encontradas ${collections.length} coleções.` }
+    } catch (error: any) {
+      console.error("Firebase connection error:", error)
+      return { success: false, message: error.message }
+    }
+  })
+
+  // Sprint handlers
+  ipcMain.handle("firebase:get-sprints", async () => {
+    try {
+      console.log("Fetching sprints from Firebase...")
+      const snapshot = await db.collection("sprints").orderBy("createdAt", "desc").get()
+      const sprints = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      console.log(`Found ${sprints.length} sprints`)
+      return sprints
+    } catch (error: any) {
+      console.error("Error getting sprints:", error)
+      // If orderBy fails due to missing index, try without ordering
+      try {
+        console.log("Retrying without orderBy...")
+        const snapshot = await db.collection("sprints").get()
+        const sprints = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        console.log(`Found ${sprints.length} sprints (unordered)`)
+        return sprints
+      } catch (retryError: any) {
+        console.error("Retry also failed:", retryError)
+        throw retryError
+      }
+    }
+  })
+
+  ipcMain.handle("firebase:create-sprint", async (_event, sprint) => {
+    try {
+      const docRef = await db.collection("sprints").add({
+        ...sprint,
+        createdAt: new Date().toISOString()
+      })
+      const doc = await docRef.get()
+      return { id: doc.id, ...doc.data() }
+    } catch (error: any) {
+      console.error("Error creating sprint:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:update-sprint", async (_event, id, updates) => {
+    try {
+      await db.collection("sprints").doc(id).update(updates)
+    } catch (error: any) {
+      console.error("Error updating sprint:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:delete-sprint", async (_event, id) => {
+    try {
+      // Delete all time entries for this sprint first
+      const entriesSnapshot = await db.collection("timeEntries").where("sprintId", "==", id).get()
+      const batch = db.batch()
+      entriesSnapshot.docs.forEach(doc => batch.delete(doc.ref))
+      await batch.commit()
+
+      // Then delete the sprint
+      await db.collection("sprints").doc(id).delete()
+    } catch (error: any) {
+      console.error("Error deleting sprint:", error)
+      throw error
+    }
+  })
+
+  // Time entry handlers
+  ipcMain.handle("firebase:get-time-entries", async (_event, sprintId) => {
+    try {
+      const snapshot = await db.collection("timeEntries")
+        .where("sprintId", "==", sprintId)
+        .orderBy("createdAt", "desc")
+        .get()
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (error: any) {
+      console.error("Error getting time entries:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:create-time-entry", async (_event, entry) => {
+    try {
+      const docRef = await db.collection("timeEntries").add({
+        ...entry,
+        createdAt: new Date().toISOString()
+      })
+      const doc = await docRef.get()
+      return { id: doc.id, ...doc.data() }
+    } catch (error: any) {
+      console.error("Error creating time entry:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:delete-time-entry", async (_event, id) => {
+    try {
+      await db.collection("timeEntries").doc(id).delete()
+    } catch (error: any) {
+      console.error("Error deleting time entry:", error)
+      throw error
+    }
+  })
 }
 
 // This method will be called when Electron has finished

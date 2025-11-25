@@ -90,3 +90,13 @@ typings/
 
 # Electron-Forge
 out/
+
+# Firebase credentials (sensitive)
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+
+# Environment variables (sensitive)
+.env.local
+.env.*.local

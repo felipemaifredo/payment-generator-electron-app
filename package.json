@@ -16,6 +16,26 @@
     "name": "felipemaifredo",
     "email": "felipemaifredo@gmail.com"
   },
+  "build": {
+    "appId": "felipemaifredo.TimeScout",
+    "productName": "TimeScout",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "extraFiles": [],
+    "win": {
+      "icon": "./src/resources/logos/logo.ico",
+      "target": "nsis"
+    },
+    "linux": {
+      "icon": "./src/resources/logos/logo.png",
+      "target": "AppImage",
+      "category": "Utility"
+    }
+  },
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
@@ -43,6 +63,7 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
+    "firebase-admin": "^13.6.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-icons": "^5.5.0",
