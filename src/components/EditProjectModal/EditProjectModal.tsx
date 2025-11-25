@@ -3,6 +3,8 @@ import { Project } from "../../types"
 import styles from "./EditProjectModal.module.css"
 import { useToast } from "../../contexts/ToastContext"
 
+import { ConfirmationModal } from "../ConfirmationModal/ConfirmationModal"
+
 interface EditProjectModalProps {
     project: Project
     onSave: (updates: Partial<Project>) => Promise<void>
@@ -15,6 +17,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onS
     const [name, setName] = useState(project.name)
     const [description, setDescription] = useState(project.description || "")
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -31,16 +34,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onS
     }
 
     const handleDelete = async () => {
-        if (confirm(`Tem certeza que deseja excluir o projeto "${project.name}"? Todas as sprints e time entries serão excluídas também.`)) {
-            setIsSubmitting(true)
-            try {
-                await onDelete()
-                onClose()
-            } catch (error) {
-                console.error("Error deleting project:", error)
-                showToast("Erro ao excluir projeto", "error")
-                setIsSubmitting(false)
-            }
+        setIsSubmitting(true)
+        try {
+            await onDelete()
+            onClose()
+        } catch (error) {
+            console.error("Error deleting project:", error)
+            showToast("Erro ao excluir projeto", "error")
+            setIsSubmitting(false)
         }
     }
 
@@ -75,7 +76,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onS
                         <button
                             type="button"
                             className={styles.deleteButton}
-                            onClick={handleDelete}
+                            onClick={() => setShowDeleteConfirm(true)}
                             disabled={isSubmitting}
                         >
                             Excluir Projeto
@@ -100,6 +101,16 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({ project, onS
                     </div>
                 </form>
             </div>
+
+            <ConfirmationModal
+                isOpen={showDeleteConfirm}
+                title="Excluir Projeto"
+                message={`Tem certeza que deseja excluir o projeto "${project.name}"? Todas as sprints e time entries serão excluídas também.`}
+                onConfirm={handleDelete}
+                onCancel={() => setShowDeleteConfirm(false)}
+                confirmLabel="Excluir"
+                isDangerous
+            />
         </div>
     )
 }

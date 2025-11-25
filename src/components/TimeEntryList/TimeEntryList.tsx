@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { TimeEntry } from "../../types"
 import { FiTrash2, FiExternalLink } from "react-icons/fi"
 import styles from "./TimeEntryList.module.css"
 import { useToast } from "../../contexts/ToastContext"
+
+import { ConfirmationModal } from "../ConfirmationModal/ConfirmationModal"
 
 interface TimeEntryListProps {
     entries: TimeEntry[]
@@ -13,16 +15,16 @@ interface TimeEntryListProps {
 export const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete }) => {
     const intl = useIntl()
     const { showToast } = useToast()
+    const [entryToDelete, setEntryToDelete] = useState<string | null>(null)
     const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0)
 
     const handleDelete = async (id: string) => {
-        if (confirm(intl.formatMessage({ id: "timeEntryList.deleteConfirm" }))) {
-            try {
-                await onDelete(id)
-            } catch (error) {
-                console.error("Error deleting entry:", error)
-                showToast(intl.formatMessage({ id: "error.deleteTimeEntry" }), "error")
-            }
+        try {
+            await onDelete(id)
+            setEntryToDelete(null)
+        } catch (error) {
+            console.error("Error deleting entry:", error)
+            showToast(intl.formatMessage({ id: "error.deleteTimeEntry" }), "error")
         }
     }
 
@@ -67,7 +69,7 @@ export const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete 
                             </div>
                             <button
                                 className={styles.deleteButton}
-                                onClick={() => handleDelete(entry.id)}
+                                onClick={() => setEntryToDelete(entry.id)}
                                 aria-label={intl.formatMessage({ id: "sprint.delete" })}
                             >
                                 <FiTrash2 size={16} />
@@ -76,6 +78,17 @@ export const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete 
                     ))}
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={!!entryToDelete}
+                title={intl.formatMessage({ id: "timeEntryList.deleteConfirmTitle" })}
+                message={intl.formatMessage({ id: "timeEntryList.deleteConfirm" })}
+                onConfirm={() => entryToDelete && handleDelete(entryToDelete)}
+                onCancel={() => setEntryToDelete(null)}
+                confirmLabel={intl.formatMessage({ id: "modal.edit.delete" })}
+                cancelLabel={intl.formatMessage({ id: "modal.edit.cancel" })}
+                isDangerous
+            />
         </div>
     )
 }

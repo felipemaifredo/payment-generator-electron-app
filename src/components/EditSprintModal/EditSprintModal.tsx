@@ -4,6 +4,8 @@ import { Sprint } from "../../types"
 import styles from "./EditSprintModal.module.css"
 import { useToast } from "../../contexts/ToastContext"
 
+import { ConfirmationModal } from "../ConfirmationModal/ConfirmationModal"
+
 interface EditSprintModalProps {
     sprint: Sprint
     onSave: (updates: Partial<Sprint>) => Promise<void>
@@ -18,6 +20,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
     const [startDate, setStartDate] = useState(sprint.startDate)
     const [endDate, setEndDate] = useState(sprint.endDate)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -34,20 +37,14 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
     }
 
     const handleDelete = async () => {
-        const confirmMessage = intl.formatMessage(
-            { id: "modal.edit.deleteConfirm" },
-            { name: sprint.name }
-        )
-        if (confirm(confirmMessage)) {
-            setIsSubmitting(true)
-            try {
-                await onDelete()
-                onClose()
-            } catch (error) {
-                console.error("Error deleting sprint:", error)
-                showToast(intl.formatMessage({ id: "error.deleteSprint" }), "error")
-                setIsSubmitting(false)
-            }
+        setIsSubmitting(true)
+        try {
+            await onDelete()
+            onClose()
+        } catch (error) {
+            console.error("Error deleting sprint:", error)
+            showToast(intl.formatMessage({ id: "error.deleteSprint" }), "error")
+            setIsSubmitting(false)
         }
     }
 
@@ -102,7 +99,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
                         <button
                             type="button"
                             className={styles.deleteButton}
-                            onClick={handleDelete}
+                            onClick={() => setShowDeleteConfirm(true)}
                             disabled={isSubmitting}
                         >
                             <FormattedMessage id="modal.edit.delete" />
@@ -127,6 +124,20 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
                     </div>
                 </form>
             </div>
+
+            <ConfirmationModal
+                isOpen={showDeleteConfirm}
+                title={intl.formatMessage({ id: "modal.edit.delete" })}
+                message={intl.formatMessage(
+                    { id: "modal.edit.deleteConfirm" },
+                    { name: sprint.name }
+                )}
+                onConfirm={handleDelete}
+                onCancel={() => setShowDeleteConfirm(false)}
+                confirmLabel={intl.formatMessage({ id: "modal.edit.delete" })}
+                cancelLabel={intl.formatMessage({ id: "modal.edit.cancel" })}
+                isDangerous
+            />
         </div>
     )
 }
