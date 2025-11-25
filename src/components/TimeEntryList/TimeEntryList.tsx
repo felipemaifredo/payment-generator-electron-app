@@ -3,6 +3,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { TimeEntry } from "../../types"
 import { FiTrash2, FiExternalLink } from "react-icons/fi"
 import styles from "./TimeEntryList.module.css"
+import { useToast } from "../../contexts/ToastContext"
 
 interface TimeEntryListProps {
     entries: TimeEntry[]
@@ -11,6 +12,7 @@ interface TimeEntryListProps {
 
 export const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete }) => {
     const intl = useIntl()
+    const { showToast } = useToast()
     const totalHours = entries.reduce((sum, entry) => sum + entry.hours, 0)
 
     const handleDelete = async (id: string) => {
@@ -19,7 +21,7 @@ export const TimeEntryList: React.FC<TimeEntryListProps> = ({ entries, onDelete 
                 await onDelete(id)
             } catch (error) {
                 console.error("Error deleting entry:", error)
-                alert(intl.formatMessage({ id: "error.deleteTimeEntry" }))
+                showToast(intl.formatMessage({ id: "error.deleteTimeEntry" }), "error")
             }
         }
     }

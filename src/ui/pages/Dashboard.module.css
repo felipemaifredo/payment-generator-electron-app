@@ -15,11 +15,58 @@
     gap: 16px;
 }
 
+.exportProjectButton {
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.backButton {
+    background-color: transparent;
+    color: var(--text-secondary);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+}
+
+.backButton:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
+.projectInfo {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 8px;
+}
+
+.projectName {
+    margin-bottom: 8px;
+}
+
 .sidebarHeader {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
 }
 
 .sidebarHeader h2 {
@@ -78,20 +125,20 @@
     padding: 32px;
     overflow-y: auto;
     background-color: var(--bg-primary);
+}
 
-    &::-webkit-scrollbar {
-        width: 12px;
-    }
+.main::-webkit-scrollbar {
+    width: 12px;
+}
 
-    &::-webkit-scrollbar-track {
-        background-color: var(--bg-primary);
-    }
+.main::-webkit-scrollbar-track {
+    background-color: var(--bg-primary);
+}
 
-    &::-webkit-scrollbar-thumb {
-        background-color: var(--text-primary);
-        border-radius: 20px;
-        border: 3px solid var(--bg-primary);
-    }
+.main::-webkit-scrollbar-thumb {
+    background-color: var(--text-primary);
+    border-radius: 20px;
+    border: 3px solid var(--bg-primary);
 }
 
 .sprintHeader {

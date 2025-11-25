@@ -1,0 +1,157 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.projectCard {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.projectCard:hover {
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.projectCard.selected {
+    border-color: var(--accent-primary);
+    background-color: var(--bg-tertiary);
+}
+
+.projectHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.projectActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+}
+
+.menuButton {
+    background-color: transparent;
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    opacity: 0;
+}
+
+.projectCard:hover .menuButton {
+    opacity: 1;
+}
+
+.menuButton:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.actionMenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    min-width: 200px;
+    overflow: hidden;
+}
+
+.menuItem {
+    width: 100%;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    text-align: left;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.menuItem:hover {
+    background-color: var(--bg-secondary);
+}
+
+.menuItem.danger {
+    color: var(--error);
+}
+
+.menuItem.danger:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+
+.projectName {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.projectDescription {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+.status {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status.active {
+    background-color: var(--success);
+    color: white;
+}
+
+.status.completed {
+    background-color: var(--text-tertiary);
+    color: white;
+}
+
+.status.archived {
+    background-color: var(--border-color);
+    color: var(--text-secondary);
+}
+
+.empty {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-secondary);
+}

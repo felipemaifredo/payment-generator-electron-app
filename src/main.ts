@@ -3,6 +3,9 @@ import path from "node:path"
 import started from "electron-squirrel-startup"
 import { db } from "./configs/firebaseConfig"
 
+// Global reference to the main window so IPC handlers can access it
+let mainWindow: BrowserWindow | null = null
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit()
@@ -10,10 +13,11 @@ if (started) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 1200,
+  mainWindow = new BrowserWindow({
+    width: 1450,
     height: 800,
     autoHideMenuBar: true,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -42,11 +46,84 @@ const createWindow = () => {
     }
   })
 
-  // Sprint handlers
-  ipcMain.handle("firebase:get-sprints", async () => {
+  // Project handlers
+  ipcMain.handle("firebase:get-projects", async () => {
     try {
-      console.log("Fetching sprints from Firebase...")
-      const snapshot = await db.collection("sprints").orderBy("createdAt", "desc").get()
+      console.log("Fetching projects from Firebase...")
+      const snapshot = await db.collection("projects").orderBy("createdAt", "desc").get()
+      const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+      console.log(`Found ${projects.length} projects`)
+      return projects
+    } catch (error: any) {
+      console.error("Error getting projects:", error)
+      // If orderBy fails due to missing index, try without ordering
+      try {
+        console.log("Retrying without orderBy...")
+        const snapshot = await db.collection("projects").get()
+        const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        console.log(`Found ${projects.length} projects (unordered)`)
+        return projects
+      } catch (retryError: any) {
+        console.error("Retry also failed:", retryError)
+        throw retryError
+      }
+    }
+  })
+
+  ipcMain.handle("firebase:create-project", async (_event, project) => {
+    try {
+      const docRef = await db.collection("projects").add({
+        ...project,
+        createdAt: new Date().toISOString()
+      })
+      const doc = await docRef.get()
+      return { id: doc.id, ...doc.data() }
+    } catch (error: any) {
+      console.error("Error creating project:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:update-project", async (_event, id, updates) => {
+    try {
+      await db.collection("projects").doc(id).update(updates)
+    } catch (error: any) {
+      console.error("Error updating project:", error)
+      throw error
+    }
+  })
+
+  ipcMain.handle("firebase:delete-project", async (_event, id) => {
+    try {
+      // Delete all sprints for this project
+      const sprintsSnapshot = await db.collection("sprints").where("projectId", "==", id).get()
+      const batch = db.batch()
+
+      // For each sprint, also delete its time entries
+      for (const sprintDoc of sprintsSnapshot.docs) {
+        const entriesSnapshot = await db.collection("timeEntries").where("sprintId", "==", sprintDoc.id).get()
+        entriesSnapshot.docs.forEach(doc => batch.delete(doc.ref))
+        batch.delete(sprintDoc.ref)
+      }
+
+      await batch.commit()
+
+      // Then delete the project
+      await db.collection("projects").doc(id).delete()
+    } catch (error: any) {
+      console.error("Error deleting project:", error)
+      throw error
+    }
+  })
+
+  // Sprint handlers
+  ipcMain.handle("firebase:get-sprints", async (_event, projectId) => {
+    try {
+      console.log(`Fetching sprints for project ${projectId} from Firebase...`)
+      const snapshot = await db.collection("sprints")
+        .where("projectId", "==", projectId)
+        .orderBy("createdAt", "desc")
+        .get()
       const sprints = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       console.log(`Found ${sprints.length} sprints`)
       return sprints
@@ -55,7 +132,9 @@ const createWindow = () => {
       // If orderBy fails due to missing index, try without ordering
       try {
         console.log("Retrying without orderBy...")
-        const snapshot = await db.collection("sprints").get()
+        const snapshot = await db.collection("sprints")
+          .where("projectId", "==", projectId)
+          .get()
         const sprints = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
         console.log(`Found ${sprints.length} sprints (unordered)`)
         return sprints
@@ -65,6 +144,7 @@ const createWindow = () => {
       }
     }
   })
+
 
   ipcMain.handle("firebase:create-sprint", async (_event, sprint) => {
     try {
@@ -147,6 +227,28 @@ const createWindow = () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", createWindow)
+
+ipcMain.on("minimize-window", () => {
+  if (mainWindow) {
+    mainWindow.minimize()
+  }
+})
+
+ipcMain.on("maximize-window", () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize()
+    } else {
+      mainWindow.maximize()
+    }
+  }
+})
+
+ipcMain.on("close-window", () => {
+  if (mainWindow) {
+    mainWindow.close()
+  }
+})
 
 // Quit when all windows are closed, except on macOS. There, it"s common
 // for applications and their menu bar to stay active until the user quits

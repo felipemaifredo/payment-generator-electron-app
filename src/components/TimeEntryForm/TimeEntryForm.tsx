@@ -1,6 +1,7 @@
 import React, { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import styles from "./TimeEntryForm.module.css"
+import { useToast } from "../../contexts/ToastContext"
 
 interface TimeEntryFormProps {
     sprintId: string
@@ -9,6 +10,7 @@ interface TimeEntryFormProps {
 
 export const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ sprintId, onSubmit }) => {
     const intl = useIntl()
+    const { showToast } = useToast()
     const [hours, setHours] = useState("")
     const [description, setDescription] = useState("")
     const [link, setLink] = useState("")
@@ -33,7 +35,7 @@ export const TimeEntryForm: React.FC<TimeEntryFormProps> = ({ sprintId, onSubmit
             setLink("")
         } catch (error) {
             console.error("Error submitting time entry:", error)
-            alert(intl.formatMessage({ id: "error.createTimeEntry" }))
+            showToast(intl.formatMessage({ id: "error.createTimeEntry" }), "error")
         } finally {
             setIsSubmitting(false)
         }

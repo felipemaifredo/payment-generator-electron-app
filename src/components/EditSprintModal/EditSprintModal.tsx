@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Sprint } from "../../types"
 import styles from "./EditSprintModal.module.css"
+import { useToast } from "../../contexts/ToastContext"
 
 interface EditSprintModalProps {
     sprint: Sprint
@@ -12,6 +13,7 @@ interface EditSprintModalProps {
 
 export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave, onDelete, onClose }) => {
     const intl = useIntl()
+    const { showToast } = useToast()
     const [name, setName] = useState(sprint.name)
     const [startDate, setStartDate] = useState(sprint.startDate)
     const [endDate, setEndDate] = useState(sprint.endDate)
@@ -25,7 +27,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
             onClose()
         } catch (error) {
             console.error("Error updating sprint:", error)
-            alert(intl.formatMessage({ id: "error.updateSprint" }))
+            showToast(intl.formatMessage({ id: "error.updateSprint" }), "error")
         } finally {
             setIsSubmitting(false)
         }
@@ -43,7 +45,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({ sprint, onSave
                 onClose()
             } catch (error) {
                 console.error("Error deleting sprint:", error)
-                alert(intl.formatMessage({ id: "error.deleteSprint" }))
+                showToast(intl.formatMessage({ id: "error.deleteSprint" }), "error")
                 setIsSubmitting(false)
             }
         }

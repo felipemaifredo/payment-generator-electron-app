@@ -1,0 +1,41 @@
+.container {
+    display: flex;
+    -webkit-app-region: no-drag;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 14px;
+}
+
+.closeButton:hover {
+    background-color: #e81123;
+    color: white;
+}

@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { useIntl, FormattedMessage } from "react-intl"
-import { Sprint, TimeEntry } from "../../types"
+import { Project, Sprint, TimeEntry } from "../../types"
 import { SprintList } from "../../components/SprintList/SprintList"
 import { TimeEntryForm } from "../../components/TimeEntryForm/TimeEntryForm"
 import { TimeEntryList } from "../../components/TimeEntryList/TimeEntryList"
-import { FiPlus, FiDownload, FiEdit } from "react-icons/fi"
+import { FiPlus, FiDownload, FiEdit, FiArrowLeft } from "react-icons/fi"
 import { EditSprintModal } from "../../components/EditSprintModal/EditSprintModal"
 import styles from "./Dashboard.module.css"
+import { useToast } from "../../contexts/ToastContext"
 
 export const Dashboard: React.FC = () => {
+    const { projectId } = useParams<{ projectId: string }>()
+    const [project, setProject] = useState<Project | null>(null)
     const [sprints, setSprints] = useState<Sprint[]>([])
     const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null)
     const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
@@ -18,10 +21,14 @@ export const Dashboard: React.FC = () => {
     const [editingSprint, setEditingSprint] = useState<Sprint | null>(null)
     const navigate = useNavigate()
     const intl = useIntl()
+    const { showToast } = useToast()
 
     useEffect(() => {
-        loadSprints()
-    }, [])
+        if (projectId) {
+            loadProject()
+            loadSprints()
+        }
+    }, [projectId])
 
     useEffect(() => {
         if (selectedSprint) {
@@ -29,9 +36,20 @@ export const Dashboard: React.FC = () => {
         }
     }, [selectedSprint])
 
-    const loadSprints = async () => {
+    const loadProject = async () => {
         try {
-            const data = await window.firebase.getSprints()
+            const projects = await window.firebase.getProjects()
+            const currentProject = projects.find(p => p.id === projectId)
+            setProject(currentProject || null)
+        } catch (error) {
+            console.error("Error loading project:", error)
+        }
+    }
+
+    const loadSprints = async () => {
+        if (!projectId) return
+        try {
+            const data = await window.firebase.getSprints(projectId)
             setSprints(data)
             if (data.length > 0 && !selectedSprint) {
                 const activeSprint = data.find(s => s.status === "active") || data[0]
@@ -55,10 +73,13 @@ export const Dashboard: React.FC = () => {
 
     const handleCreateSprint = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        if (!projectId) return
+
         const formData = new FormData(e.currentTarget)
 
         try {
             const newSprint = await window.firebase.createSprint({
+                projectId,
                 name: formData.get("name") as string,
                 startDate: formData.get("startDate") as string,
                 endDate: formData.get("endDate") as string,
@@ -118,6 +139,65 @@ export const Dashboard: React.FC = () => {
         document.body.removeChild(link)
     }
 
+    const handleExportProjectCSV = async () => {
+        if (!projectId || !project) return
+
+        try {
+            // Get all sprints for this project
+            const allSprints = await window.firebase.getSprints(projectId)
+
+            if (allSprints.length === 0) {
+                showToast("Nenhuma sprint encontrada neste projeto", "info")
+                return
+            }
+
+            // Get time entries for all sprints
+            const allEntries: { sprint: string; entry: TimeEntry }[] = []
+
+            for (const sprint of allSprints) {
+                const entries = await window.firebase.getTimeEntries(sprint.id)
+                entries.forEach(entry => {
+                    allEntries.push({ sprint: sprint.name, entry })
+                })
+            }
+
+            if (allEntries.length === 0) {
+                showToast("Nenhuma entrada de tempo encontrada neste projeto", "info")
+                return
+            }
+
+            // Create CSV with sprint grouping
+            const headers = ["Sprint", "Data", "Horas", "Descrição", "Link"]
+            const rows = allEntries.map(({ sprint, entry }) => [
+                `"${sprint}"`,
+                entry.createdAt,
+                entry.hours.toString(),
+                `"${entry.description.replace(/"/g, '""')}"`,
+                entry.link || ""
+            ])
+
+            const csvContent = [
+                headers.join(","),
+                ...rows.map(row => row.join(","))
+            ].join("\n")
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+            const link = document.createElement("a")
+            const url = URL.createObjectURL(blob)
+
+            link.setAttribute("href", url)
+            link.setAttribute("download", `${project.name.replace(/\s+/g, "_")}_projeto_completo.csv`)
+            link.style.visibility = "hidden"
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        } catch (error) {
+            console.error("Error exporting project CSV:", error)
+            showToast("Erro ao exportar CSV do projeto", "error")
+        }
+    }
+
+
     const handleEditSprint = async (updates: Partial<Sprint>) => {
         if (!editingSprint) return
         await window.firebase.updateSprint(editingSprint.id, updates)
@@ -144,6 +224,32 @@ export const Dashboard: React.FC = () => {
     return (
         <div className={styles.container}>
             <div className={styles.sidebar}>
+                <button
+                    className={styles.backButton}
+                    onClick={() => navigate("/")}
+                >
+                    <FiArrowLeft size={20} />
+                    Voltar para Projetos
+                </button>
+
+                {project && (
+                    <div className={styles.projectInfo}>
+                        <h2 className={styles.projectName}>{project.name}</h2>
+                        {project.description && (
+                            <p className={styles.projectDescription}>{project.description}</p>
+                        )}
+                    </div>
+                )}
+
+                <button
+                    className={styles.exportProjectButton}
+                    onClick={handleExportProjectCSV}
+                    disabled={sprints.length === 0}
+                >
+                    <FiDownload size={16} />
+                    Exportar Projeto Completo (CSV)
+                </button>
+
                 <div className={styles.sidebarHeader}>
                     <h2>Sprints</h2>
                     <button

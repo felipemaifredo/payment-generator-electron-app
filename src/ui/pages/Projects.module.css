@@ -1,0 +1,131 @@
+.container {
+    padding: 32px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: calc(100vh - 60px);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.newProjectButton {
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.newProjectButton:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.newProjectForm {
+    background-color: var(--bg-secondary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.newProjectForm input,
+.newProjectForm textarea {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    font-family: inherit;
+    resize: vertical;
+}
+
+.newProjectForm input:focus,
+.newProjectForm textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.formActions {
+    display: flex;
+    gap: 12px;
+}
+
+.submitButton {
+    background-color: var(--accent-primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+    background-color: var(--accent-hover);
+}
+
+.cancelButton {
+    background-color: transparent;
+    color: var(--text-secondary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+.projectsContainer {
+    margin-top: 24px;
+}
+
+.empty {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-secondary);
+}
+
+.empty p {
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.emptyHint {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 60px);
+    font-size: 18px;
+    color: var(--text-secondary);
+}
