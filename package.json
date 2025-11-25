@@ -1,8 +1,8 @@
 {
   "name": "payment-generator-electron-app",
-  "productName": "payment-generator-electron-app",
+  "productName": "SprintTimer",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "My Electron application SprintTimer",
   "main": ".vite/build/main.js",
   "scripts": {
     "start": "electron-forge start",
@@ -15,26 +15,6 @@
   "author": {
     "name": "felipemaifredo",
     "email": "felipemaifredo@gmail.com"
-  },
-  "build": {
-    "appId": "felipemaifredo.TimeScout",
-    "productName": "TimeScout",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "**/*"
-    ],
-    "extraFiles": [],
-    "win": {
-      "icon": "./src/resources/logos/logo.ico",
-      "target": "nsis"
-    },
-    "linux": {
-      "icon": "./src/resources/logos/logo.png",
-      "target": "AppImage",
-      "category": "Utility"
-    }
   },
   "license": "MIT",
   "devDependencies": {
